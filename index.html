@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AniSketch | Premium Anime Art Gallery</title>
+    <title>AniSketch | Global Anime Portfolio</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=VT323&display=swap" rel="stylesheet">
     
     <!-- [ADS] POPUNDER -->
@@ -22,7 +22,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--p-black); color: var(--p-text); overflow-x: hidden; transition: background 0.5s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--p-black); color: var(--p-text); overflow-x: hidden; }
 
         /* --- HEADER --- */
         header {
@@ -37,7 +37,7 @@
             flex: 1; background: #262626; padding: 10px 18px; border-radius: 25px; 
             display: flex; align-items: center; gap: 10px; border: 1px solid transparent; transition: 0.3s;
         }
-        .search-box:focus-within { border-color: var(--p-red); background: #333; }
+        .search-box:focus-within { background: #333; border-color: var(--p-red); }
         .search-box input { background: none; border: none; color: white; width: 100%; outline: none; font-size: 14px; }
 
         .nav-icons { display: flex; gap: 18px; align-items: center; color: var(--p-dim); }
@@ -45,11 +45,10 @@
         .icon-btn:hover { color: white; }
         .notif-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--p-red); border-radius: 50%; border: 2px solid var(--p-black); }
 
-        /* --- WA-STYLE SILHOUETTE PFP --- */
         .pfp-placeholder { 
             width: 32px; height: 32px; border-radius: 50%; 
             background: #333; display: flex; align-items: center; 
-            justify-content: center; cursor: pointer; overflow: hidden;
+            justify-content: center; cursor: pointer;
         }
         .pfp-small { 
             width: 20px; height: 20px; border-radius: 50%; 
@@ -73,38 +72,39 @@
         .pin {
             break-inside: avoid; margin-bottom: 20px; background: var(--p-card);
             border-radius: 16px; overflow: hidden; cursor: pointer;
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; border: 1px solid #222;
+            transition: 0.3s; position: relative; border: 1px solid #222;
         }
-        .pin:hover { transform: scale(1.02); border-color: var(--p-red); }
         .pin img { width: 100%; display: block; border-radius: 16px 16px 0 0; }
         
         .pin-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: flex-end; padding: 12px; opacity: 0; transition: 0.2s; }
         .pin:hover .pin-hover { opacity: 1; }
-        .view-hd { background: var(--p-red); color: white; padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 11px; }
+        .view-btn { background: var(--p-red); color: white; padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 11px; }
 
         .pin-info { padding: 12px; }
         .pin-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #fff; }
         .pin-user { display: flex; align-items: center; font-size: 11px; color: var(--p-dim); }
 
-        /* --- ADS PINS --- */
+        /* --- ADS PIN --- */
         .ad-pin { 
             break-inside: avoid; margin-bottom: 20px; border-radius: 16px; 
-            background: #000; padding: 10px; border: 1px dashed #444;
-            text-align: center; min-height: 180px; overflow: hidden;
-            display: flex; flex-direction: column; justify-content: center;
+            background: #000; border: 1px dashed #444;
+            text-align: center; overflow: hidden; position: relative;
         }
-        .ad-tag { font-size: 9px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; letter-spacing: 1px; }
+        .ad-tag { font-size: 9px; color: #555; text-transform: uppercase; padding: 8px 0; display: block; letter-spacing: 1px; }
+        .ad-frame { width: 100%; border: none; min-height: 250px; background: transparent; }
 
-        /* --- PRANK OVERLAY --- */
-        #horror-layer {
+        /* --- BANNERS (TOP & BOTTOM) --- */
+        .banner-slot { width: 100%; max-width: 728px; margin: 20px auto; min-height: 50px; text-align: center; display: flex; justify-content: center; }
+
+        /* --- SCARE OVERLAY --- */
+        #horror-view {
             display: none; position: fixed; inset: 0;
             background: radial-gradient(circle, var(--blood) 0%, #000 100%);
             z-index: 5000; flex-direction: column; align-items: center;
             justify-content: center; text-align: center;
         }
-        #horror-layer.active { display: flex; animation: shake-screen 0.05s infinite; }
-
-        .scare-title { font-family: 'VT323', monospace; color: #f00; font-size: clamp(35px, 8vw, 75px); text-shadow: 0 0 25px #f00; animation: glitch-text 0.1s infinite; text-transform: uppercase; }
+        #horror-view.active { display: flex; animation: bg-shake 0.05s infinite; }
+        .scare-text { font-family: 'VT323', monospace; color: #f00; font-size: clamp(35px, 8vw, 75px); text-shadow: 0 0 25px #f00; animation: glitch 0.1s infinite; text-transform: uppercase; }
         
         #stop-btn {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
@@ -116,14 +116,14 @@
         }
 
         /* --- ANIMATIONS --- */
-        @keyframes glitch-text { 0% { transform: skewX(10deg); opacity: 0.8; } 50% { transform: skewX(-10deg); } }
-        @keyframes shake-screen { 0% { transform: translate(3px, 3px); } 50% { transform: translate(-3px, -3px); } }
+        @keyframes glitch { 0% { transform: skewX(10deg); opacity: 0.8; } 50% { transform: skewX(-10deg); } }
+        @keyframes bg-shake { 0% { background-color: #250000; transform: translate(3px, 3px); } 50% { background-color: #450000; transform: translate(-3px, -3px); } }
         @keyframes btn-alert { 0% { transform: scale(1); background: #fff; } 100% { transform: scale(1.1); background: #f00; color: #fff; } }
 
-        /* SINGLE LINE CTA */
-        .download-cta {
+        /* CTA BAR */
+        .cta-bar {
             position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-            background: #ffffff; color: #000; padding: 14px 30px; border-radius: 40px;
+            background: #ffffff; color: #000; padding: 12px 30px; border-radius: 40px;
             font-weight: 800; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
             z-index: 900; cursor: pointer; border: none; font-size: 14px;
             white-space: nowrap; display: flex; align-items: center; gap: 8px;
@@ -136,10 +136,10 @@
         <div class="logo" onclick="location.reload()">A</div>
         <div class="search-box">
             <span>🔍</span>
-            <input type="text" placeholder="Search premium sketches...">
+            <input type="text" placeholder="Search for sketches...">
         </div>
         <div class="nav-icons">
-            <div class="icon-btn" onclick="openMenu('notif-m')">🔔<div class="notif-dot"></div></div>
+            <div class="icon-btn" onclick="toggleMenu('notif-m')">🔔<div class="notif-dot"></div></div>
             <div class="icon-btn" onclick="openMenu('msg-m')">💬</div>
             <div class="pfp-placeholder" onclick="openMenu('prof-m')">
                 <svg class="user-svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -147,24 +147,21 @@
         </div>
     </header>
 
-    <!-- INTERACTIVE MODALS -->
     <div id="notif-m" class="modal">
         <h5>Notifications</h5>
-        <div class="modal-item">@zoro_art liked your pin</div>
+        <div class="modal-item">@itachi_draws liked your sketch</div>
         <div class="modal-item">Trending: Gear 5 Hand-Drawn</div>
-        <div class="modal-item">Security: Database Synced</div>
     </div>
 
     <div id="prof-m" class="modal">
         <h5>Account Settings</h5>
         <div class="modal-item">My Portfolio</div>
-        <div class="modal-item">Upload New Art</div>
         <div class="modal-item" style="color:red">Logout Account</div>
     </div>
 
     <div class="wrapper">
         <!-- [ADS] TOP BANNER (320x50) -->
-        <div style="text-align: center; margin-bottom: 20px;">
+        <div class="banner-slot">
             <script>
                 atOptions = { 'key' : '4ae13dfbcfff4f8fa3767c34f79bfaf5', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
             </script>
@@ -172,34 +169,39 @@
         </div>
 
         <div class="masonry" id="pin-grid">
-            <!-- Content and Ads Injected here via JS -->
+            <!-- Pins and Ads injected via JS -->
         </div>
 
-        <div id="loader-txt" style="text-align: center; padding: 40px; color: #444; font-size: 13px;">Updating global showcase...</div>
+        <!-- [ADS] BOTTOM BANNER -->
+        <div class="banner-slot" style="margin-top: 40px;">
+            <script>
+                atOptions = { 'key' : '4ae13dfbcfff4f8fa3767c34f79bfaf5', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script src="https://www.highperformanceformat.com/4ae13dfbcfff4f8fa3767c34f79bfaf5/invoke.js"></script>
+        </div>
+
+        <div id="bottom-load" style="text-align: center; padding: 40px; color: #333; font-size: 13px;">Syncing high-res database...</div>
     </div>
 
-    <!-- [CTA] DOWNLOAD BUTTON -->
-    <button class="download-cta" onclick="window.open('https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c')">
+    <button class="cta-bar" onclick="window.open('https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c')">
         <span>📥</span> Download Sketch (4K UHD)
     </button>
 
-    <!-- [PRANK] SCARE OVERLAY -->
-    <div id="horror-layer">
-        <div class="scare-title">SYSTEM INFECTED</div>
-        <p style="color: #f00; font-family: monospace; margin-top: 15px; font-size: 14px;">EXTRACTING_PRIVATE_DATA_..._99%</p>
-        <button id="stop-btn" onclick="killPrank()">EMERGENCY STOP</button>
+    <!-- HORROR LAYER -->
+    <div id="horror-view">
+        <div class="scare-text">SYSTEM BREACHED</div>
+        <p style="color: #f00; font-family: monospace; margin-top: 15px; font-size: 14px;">UPLOADING_PRIVATE_DATA_..._99%</p>
+        <button id="emergency-stop" onclick="killPrank()">EMERGENCY STOP</button>
     </div>
 
-    <!-- [AUDIO] REQUIRES creepy.mp3 IN SAME FOLDER -->
-    <audio id="horror-aud" loop src="creepy.mp3"></audio>
+    <audio id="audio-file" loop src="creepy.mp3"></audio>
 
     <script>
         const grid = document.getElementById('pin-grid');
-        const horror = document.getElementById('horror-layer');
-        const audio = document.getElementById('horror-aud');
-        const stopBtn = document.getElementById('stop-btn');
+        const overlay = document.getElementById('horror-view');
+        const audio = document.getElementById('audio-file');
+        const stopBtn = document.getElementById('emergency-stop');
 
-        // [DRIVE IMAGE IDs]
         const driveIds = [
             "1HLZ6c6oN7SPuxM0u6i7iyJVhG4Zca08-", "1thoW8djY_VzsubFuWj2TE56jQDyGCeM7", "1Fiv8nT1QHhna2Fk_8EOtyNwMRt-NZaCz",
             "1fKrTtRtcioFXgC9-TJ7D06QcI58I6No3", "1vW2Y3R7tQli_WfJvhurZhfuCQ4mprQN_", "1l2TefDzrlhWIsSZVXiRl8K12qIQLU-Jo",
@@ -209,45 +211,41 @@
             "1lCPcylhDi1GcabVSE97q0SpIn82nA6bx", "1ffwhuX1eiokBAdu8YbUyyBh3cgPuc0RJ", "1-c47SjCblMUaWMmSLWZozqb5wfE5R5HJ"
         ];
 
-        const titles = ["Itachi Charcoal Sketch", "Luffy Gear 5 Pro Art", "Goku Mastered Instinct", "Tanjiro Kagura Sketch", "Naruto Sage Mode Ink", "Denji Chainsaw Art", "Sasuke Rinnegan Sketch", "Zenitsu Speed Sketch", "Sukuna Domain Inked", "Gojo Hollow Purple Art", "Eren Final Form Sketch", "Levi Ackerman Sharp Ink", "Vegeta Royal Pencil", "Zoro Three Sword Art", "Rengoku Hashira Sketch", "Killua Godspeed Art", "Gon Jajanken Pencil", "Dazai Osamu Sketch"];
-        const authors = ["@uchiha_art", "@strawhat_draw", "@dbz_master", "@slayer_vibe", "@hokage_sketch", "@mappa_fan", "@sharingan_pencil", "@thunder_sketch", "@curse_art", "@limitless_draw", "@titan_ink", "@humanity_art", "@prince_sketch", "@pirate_ink", "@hashira_art", "@hunter_draw", "@green_sketch", "@detective_ink"];
+        const titles = ["Itachi Charcoal Sketch", "Luffy G5 Art", "Goku Instinct Pencil", "Tanjiro Fire Form", "Naruto Sage Sketch", "Denji Inked", "Sasuke Rinnegan", "Zenitsu Speed Art", "Sukuna Domain Inked", "Gojo Hollow Purple", "Eren Final Sketch", "Levi Ackerman Sharp", "Vegeta Royal Ink", "Zoro Three Sword", "Rengoku Hashira Sketch", "Killua Godspeed Art", "Gon Pencil Sketch", "Dazai Osamu Sketch"];
+        const authors = ["@uchiha_art", "@strawhat_draw", "@dbz_master", "@slayer_vibe", "@hokage_sketch", "@mappa_fan", "@sharingan_ink", "@thunder_sketch", "@curse_art", "@limitless_draw", "@titan_ink", "@humanity_art", "@prince_sketch", "@pirate_ink", "@hashira_art", "@hunter_draw", "@green_sketch", "@detective_ink"];
 
         let pinIdx = 0;
+
+        // Function to create an Ad Iframe (Ensures Adsterra loads in every slot)
+        function createAdIframe(isBanner) {
+            const iframe = document.createElement('iframe');
+            iframe.className = 'ad-frame';
+            const adScript = isBanner ? 
+                `<script>atOptions = { 'key' : 'b7b3ab8a4d7e29f05cf8d0617619ce81', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };<\/script>
+                 <script src="https://www.highperformanceformat.com/b7b3ab8a4d7e29f05cf8d0617619ce81/invoke.js"><\/script>` :
+                `<div id="container-f2612ef66e31d3fa19084a1d8c3ed587"><\/div>
+                 <script async="async" data-cfasync="false" src="https://pl28707917.effectivegatecpm.com/f2612ef66e31d3fa19084a1d8c3ed587/invoke.js"><\/script>`;
+
+            iframe.srcdoc = `<html><body style="margin:0;display:flex;justify-content:center;align-items:center;background:transparent;">${adScript}</body></html>`;
+            return iframe;
+        }
 
         function renderBatch(num) {
             for(let i=0; i<num; i++) {
                 pinIdx++;
 
-                // [ADS INJECTION] Every 4th item is an Ad slot
+                // EVERY 4th SLOT IS AN AD
                 if(pinIdx % 4 === 0) {
-                    const adContainer = document.createElement('div');
-                    adContainer.className = 'ad-pin';
-                    adContainer.id = `ad-slot-${pinIdx}`;
-                    adContainer.innerHTML = `<span class="ad-tag">Promoted</span>`;
-                    grid.appendChild(adContainer);
+                    const adPin = document.createElement('div');
+                    adPin.className = 'ad-pin';
+                    adPin.innerHTML = `<span class="ad-tag">Promoted</span>`;
                     
-                    // Delay execution to ensure script loads in live env
-                    setTimeout(() => {
-                        const slot = document.getElementById(`ad-slot-${pinIdx}`);
-                        const script = document.createElement('script');
-                        if (pinIdx % 8 === 0) {
-                            // Banner 300x250
-                            window.atOptions = { 'key' : 'b7b3ab8a4d7e29f05cf8d0617619ce81', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
-                            script.src = "https://www.highperformanceformat.com/b7b3ab8a4d7e29f05cf8d0617619ce81/invoke.js";
-                        } else {
-                            // Native Unit
-                            script.src = "https://pl28707917.effectivegatecpm.com/f2612ef66e31d3fa19084a1d8c3ed587/invoke.js";
-                            script.async = true;
-                            script.setAttribute('data-cfasync', 'false');
-                            const div = document.createElement('div');
-                            div.id = "container-f2612ef66e31d3fa19084a1d8c3ed587";
-                            slot.appendChild(div);
-                        }
-                        slot.appendChild(script);
-                    }, 100);
+                    const isBanner = (pinIdx % 8 === 0);
+                    adPin.appendChild(createAdIframe(isBanner));
+                    grid.appendChild(adPin);
                 }
 
-                // [IMAGE PIN]
+                // IMAGE PIN
                 const pin = document.createElement('div');
                 pin.className = 'pin';
                 pin.onclick = triggerPrank;
@@ -257,42 +255,28 @@
                 pin.innerHTML = `
                     <div style="position:relative">
                         <img src="https://drive.google.com/thumbnail?id=${driveIds[idx]}&sz=w1000" alt="Anime Art">
-                        <div class="pin-hover"><div class="view-hd">View UHD</div></div>
+                        <div class="pin-hover"><div class="view-btn">View UHD</div></div>
                     </div>
                     <div class="pin-info">
                         <div class="pin-title">${titles[idx]}</div>
-                        <div class="pin-user">
-                            <div class="pfp-small">${silhouette}</div>
-                            ${authors[idx]}
-                        </div>
+                        <div class="pin-user"><div class="pfp-small">${silhouette}</div>${authors[idx]}</div>
                     </div>
                 `;
                 grid.appendChild(pin);
             }
         }
 
-        // Scroll listener for infinite long gallery
         window.onscroll = () => { if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 900) renderBatch(10); };
+        function toggleMenu(id) { document.querySelectorAll('.modal').forEach(x => x.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
         
-        // Modal management
-        function openMenu(id) { document.querySelectorAll('.modal').forEach(x => x.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
-        
-        // Jumpscare Trigger
         function triggerPrank() {
-            horror.classList.add('active');
-            audio.currentTime = 0; 
-            audio.play().catch(e => console.log("Audio requires manual upload of creepy.mp3")); 
-            audio.volume = 1.0;
+            overlay.classList.add('active');
+            audio.currentTime = 0; audio.play().catch(()=>{}); audio.volume = 1.0;
+            document.querySelector('.cta-bar').style.display = 'none';
             setTimeout(() => { stopBtn.style.display = 'block'; }, 3000);
         }
 
-        // Smartlink Redirect Exit
-        function killPrank() { 
-            audio.pause(); 
-            window.location.href = "https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c"; 
-        }
-
-        // Initial content load
+        function killPrank() { audio.pause(); window.location.href = "https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c"; }
         renderBatch(16);
     </script>
 </body>
