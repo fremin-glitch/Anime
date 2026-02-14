@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AniSketch | Premium Anime Art Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- [ADS] POPUNDER -->
+    <script src="https://pl28707903.effectivegatecpm.com/f2/dd/5b/f2dd5bb76f95f63fc86650ad6a817044.js"></script>
+    <!-- [ADS] SOCIAL BAR -->
+    <script src="https://pl28707969.effectivegatecpm.com/39/d4/bb/39d4bb3e43d25b8cc2141bfe3b9779c9.js"></script>
+
+    <style>
+        :root {
+            --p-red: #e60023;
+            --p-black: #0a0a0a;
+            --p-card: #181818;
+            --p-text: #ffffff;
+            --p-dim: #8e8e8e;
+            --blood: #400000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--p-black); color: var(--p-text); overflow-x: hidden; transition: background 0.5s; }
+
+        /* --- HEADER --- */
+        header {
+            position: sticky; top: 0; background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px); padding: 10px 5%;
+            display: flex; align-items: center; gap: 15px; z-index: 1000;
+            border-bottom: 1px solid #222;
+        }
+        .logo { background: var(--p-red); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; cursor: pointer; font-size: 18px; }
+        
+        .search-box { 
+            flex: 1; background: #262626; padding: 10px 18px; border-radius: 25px; 
+            display: flex; align-items: center; gap: 10px; border: 1px solid transparent; transition: 0.3s;
+        }
+        .search-box:focus-within { border-color: var(--p-red); background: #333; }
+        .search-box input { background: none; border: none; color: white; width: 100%; outline: none; font-size: 14px; }
+
+        .nav-icons { display: flex; gap: 18px; align-items: center; color: var(--p-dim); }
+        .icon-btn { cursor: pointer; font-size: 20px; position: relative; }
+        .icon-btn:hover { color: white; }
+        .notif-dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--p-red); border-radius: 50%; border: 2px solid var(--p-black); }
+
+        /* --- WA-STYLE SILHOUETTE PFP --- */
+        .pfp-placeholder { 
+            width: 32px; height: 32px; border-radius: 50%; 
+            background: #333; display: flex; align-items: center; 
+            justify-content: center; cursor: pointer; overflow: hidden;
+        }
+        .pfp-small { 
+            width: 20px; height: 20px; border-radius: 50%; 
+            background: #444; display: flex; align-items: center; 
+            justify-content: center; overflow: hidden; margin-right: 8px;
+        }
+        .user-svg { width: 100%; height: 100%; fill: #888; }
+
+        /* --- MODALS --- */
+        .modal { display: none; position: fixed; top: 65px; right: 5%; background: var(--p-card); width: 240px; border-radius: 16px; padding: 15px; box-shadow: 0 10px 40px rgba(0,0,0,1); z-index: 2000; border: 1px solid #333; }
+        .modal h5 { font-size: 14px; margin-bottom: 12px; color: var(--p-red); border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .modal-item { padding: 8px 0; font-size: 13px; color: var(--p-dim); cursor: pointer; display: block; }
+        .modal-item:hover { color: white; padding-left: 5px; }
+
+        /* --- MASONRY GRID --- */
+        .wrapper { padding: 15px 5%; width: 100%; max-width: 1600px; margin: 0 auto; }
+        .masonry { column-count: 2; column-gap: 15px; }
+        @media (min-width: 768px) { .masonry { column-count: 4; } }
+        @media (min-width: 1200px) { .masonry { column-count: 5; } }
+
+        .pin {
+            break-inside: avoid; margin-bottom: 20px; background: var(--p-card);
+            border-radius: 16px; overflow: hidden; cursor: pointer;
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; border: 1px solid #222;
+        }
+        .pin:hover { transform: scale(1.02); border-color: var(--p-red); }
+        .pin img { width: 100%; display: block; border-radius: 16px 16px 0 0; }
+        
+        .pin-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: flex-end; padding: 12px; opacity: 0; transition: 0.2s; }
+        .pin:hover .pin-hover { opacity: 1; }
+        .view-hd { background: var(--p-red); color: white; padding: 6px 15px; border-radius: 20px; font-weight: 700; font-size: 11px; }
+
+        .pin-info { padding: 12px; }
+        .pin-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+        .pin-user { display: flex; align-items: center; font-size: 11px; color: var(--p-dim); }
+
+        /* --- ADS PINS --- */
+        .ad-pin { 
+            break-inside: avoid; margin-bottom: 20px; border-radius: 16px; 
+            background: #000; padding: 10px; border: 1px dashed #444;
+            text-align: center; min-height: 180px; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .ad-tag { font-size: 9px; color: #666; text-transform: uppercase; margin-bottom: 10px; display: block; letter-spacing: 1px; }
+
+        /* --- PRANK OVERLAY --- */
+        #horror-layer {
+            display: none; position: fixed; inset: 0;
+            background: radial-gradient(circle, var(--blood) 0%, #000 100%);
+            z-index: 5000; flex-direction: column; align-items: center;
+            justify-content: center; text-align: center;
+        }
+        #horror-layer.active { display: flex; animation: shake-screen 0.05s infinite; }
+
+        .scare-title { font-family: 'VT323', monospace; color: #f00; font-size: clamp(35px, 8vw, 75px); text-shadow: 0 0 25px #f00; animation: glitch-text 0.1s infinite; text-transform: uppercase; }
+        
+        #stop-btn {
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #ffffff; color: #ff0000; border: 8px solid #ff0000;
+            padding: 22px 45px; font-family: 'VT323', monospace; font-size: 32px;
+            font-weight: 900; cursor: pointer; z-index: 6000;
+            box-shadow: 0 0 80px #ffffff, 0 0 40px #f00; animation: btn-alert 0.3s infinite alternate;
+            text-transform: uppercase; white-space: nowrap;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes glitch-text { 0% { transform: skewX(10deg); opacity: 0.8; } 50% { transform: skewX(-10deg); } }
+        @keyframes shake-screen { 0% { transform: translate(3px, 3px); } 50% { transform: translate(-3px, -3px); } }
+        @keyframes btn-alert { 0% { transform: scale(1); background: #fff; } 100% { transform: scale(1.1); background: #f00; color: #fff; } }
+
+        /* SINGLE LINE CTA */
+        .download-cta {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: #ffffff; color: #000; padding: 14px 30px; border-radius: 40px;
+            font-weight: 800; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            z-index: 900; cursor: pointer; border: none; font-size: 14px;
+            white-space: nowrap; display: flex; align-items: center; gap: 8px;
+        }
+    </style>
+</head>
+<body id="app-root">
+
+    <header>
+        <div class="logo" onclick="location.reload()">A</div>
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" placeholder="Search premium sketches...">
+        </div>
+        <div class="nav-icons">
+            <div class="icon-btn" onclick="openMenu('notif-m')">🔔<div class="notif-dot"></div></div>
+            <div class="icon-btn" onclick="openMenu('msg-m')">💬</div>
+            <div class="pfp-placeholder" onclick="openMenu('prof-m')">
+                <svg class="user-svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+            </div>
+        </div>
+    </header>
+
+    <!-- INTERACTIVE MODALS -->
+    <div id="notif-m" class="modal">
+        <h5>Notifications</h5>
+        <div class="modal-item">@zoro_art liked your pin</div>
+        <div class="modal-item">Trending: Gear 5 Hand-Drawn</div>
+        <div class="modal-item">Security: Database Synced</div>
+    </div>
+
+    <div id="prof-m" class="modal">
+        <h5>Account Settings</h5>
+        <div class="modal-item">My Portfolio</div>
+        <div class="modal-item">Upload New Art</div>
+        <div class="modal-item" style="color:red">Logout Account</div>
+    </div>
+
+    <div class="wrapper">
+        <!-- [ADS] TOP BANNER (320x50) -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <script>
+                atOptions = { 'key' : '4ae13dfbcfff4f8fa3767c34f79bfaf5', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
+            </script>
+            <script src="https://www.highperformanceformat.com/4ae13dfbcfff4f8fa3767c34f79bfaf5/invoke.js"></script>
+        </div>
+
+        <div class="masonry" id="pin-grid">
+            <!-- Content and Ads Injected here via JS -->
+        </div>
+
+        <div id="loader-txt" style="text-align: center; padding: 40px; color: #444; font-size: 13px;">Updating global showcase...</div>
+    </div>
+
+    <!-- [CTA] DOWNLOAD BUTTON -->
+    <button class="download-cta" onclick="window.open('https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c')">
+        <span>📥</span> Download Sketch (4K UHD)
+    </button>
+
+    <!-- [PRANK] SCARE OVERLAY -->
+    <div id="horror-layer">
+        <div class="scare-title">SYSTEM INFECTED</div>
+        <p style="color: #f00; font-family: monospace; margin-top: 15px; font-size: 14px;">EXTRACTING_PRIVATE_DATA_..._99%</p>
+        <button id="stop-btn" onclick="killPrank()">EMERGENCY STOP</button>
+    </div>
+
+    <!-- [AUDIO] REQUIRES creepy.mp3 IN SAME FOLDER -->
+    <audio id="horror-aud" loop src="creepy.mp3"></audio>
+
+    <script>
+        const grid = document.getElementById('pin-grid');
+        const horror = document.getElementById('horror-layer');
+        const audio = document.getElementById('horror-aud');
+        const stopBtn = document.getElementById('stop-btn');
+
+        // [DRIVE IMAGE IDs]
+        const driveIds = [
+            "1HLZ6c6oN7SPuxM0u6i7iyJVhG4Zca08-", "1thoW8djY_VzsubFuWj2TE56jQDyGCeM7", "1Fiv8nT1QHhna2Fk_8EOtyNwMRt-NZaCz",
+            "1fKrTtRtcioFXgC9-TJ7D06QcI58I6No3", "1vW2Y3R7tQli_WfJvhurZhfuCQ4mprQN_", "1l2TefDzrlhWIsSZVXiRl8K12qIQLU-Jo",
+            "1V3JLVtlpGesQa_S5jfSzKBmAcgPGxtX5", "1MLMVp1HqlOpEjqO6uSM10lH4mGfqQ64x", "1yQ9IyO5KQDrg5tOqpp2JKaHBS0C0ntv5",
+            "17PSr5xUNngUftppx8NZbuIAxcLQDV9hK", "1fNSmgy2T3hkhG-ZyXpgFB95gueo3OFRg", "1eOp9GMCfkpqtKNUj562AEej2EAA4grkt",
+            "1t5U7Ikkwzbkr1sOi2jybi-KG8sFozwZp", "1qN_h3yH07YOrmnHXsXCXS0OvlCLszsJp", "1a5v7p8e2sQsVzx_GXAnLBPAXarg8IatJ",
+            "1lCPcylhDi1GcabVSE97q0SpIn82nA6bx", "1ffwhuX1eiokBAdu8YbUyyBh3cgPuc0RJ", "1-c47SjCblMUaWMmSLWZozqb5wfE5R5HJ"
+        ];
+
+        const titles = ["Itachi Charcoal Sketch", "Luffy Gear 5 Pro Art", "Goku Mastered Instinct", "Tanjiro Kagura Sketch", "Naruto Sage Mode Ink", "Denji Chainsaw Art", "Sasuke Rinnegan Sketch", "Zenitsu Speed Sketch", "Sukuna Domain Inked", "Gojo Hollow Purple Art", "Eren Final Form Sketch", "Levi Ackerman Sharp Ink", "Vegeta Royal Pencil", "Zoro Three Sword Art", "Rengoku Hashira Sketch", "Killua Godspeed Art", "Gon Jajanken Pencil", "Dazai Osamu Sketch"];
+        const authors = ["@uchiha_art", "@strawhat_draw", "@dbz_master", "@slayer_vibe", "@hokage_sketch", "@mappa_fan", "@sharingan_pencil", "@thunder_sketch", "@curse_art", "@limitless_draw", "@titan_ink", "@humanity_art", "@prince_sketch", "@pirate_ink", "@hashira_art", "@hunter_draw", "@green_sketch", "@detective_ink"];
+
+        let pinIdx = 0;
+
+        function renderBatch(num) {
+            for(let i=0; i<num; i++) {
+                pinIdx++;
+
+                // [ADS INJECTION] Every 4th item is an Ad slot
+                if(pinIdx % 4 === 0) {
+                    const adContainer = document.createElement('div');
+                    adContainer.className = 'ad-pin';
+                    adContainer.id = `ad-slot-${pinIdx}`;
+                    adContainer.innerHTML = `<span class="ad-tag">Promoted</span>`;
+                    grid.appendChild(adContainer);
+                    
+                    // Delay execution to ensure script loads in live env
+                    setTimeout(() => {
+                        const slot = document.getElementById(`ad-slot-${pinIdx}`);
+                        const script = document.createElement('script');
+                        if (pinIdx % 8 === 0) {
+                            // Banner 300x250
+                            window.atOptions = { 'key' : 'b7b3ab8a4d7e29f05cf8d0617619ce81', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
+                            script.src = "https://www.highperformanceformat.com/b7b3ab8a4d7e29f05cf8d0617619ce81/invoke.js";
+                        } else {
+                            // Native Unit
+                            script.src = "https://pl28707917.effectivegatecpm.com/f2612ef66e31d3fa19084a1d8c3ed587/invoke.js";
+                            script.async = true;
+                            script.setAttribute('data-cfasync', 'false');
+                            const div = document.createElement('div');
+                            div.id = "container-f2612ef66e31d3fa19084a1d8c3ed587";
+                            slot.appendChild(div);
+                        }
+                        slot.appendChild(script);
+                    }, 100);
+                }
+
+                // [IMAGE PIN]
+                const pin = document.createElement('div');
+                pin.className = 'pin';
+                pin.onclick = triggerPrank;
+                const idx = (pinIdx - 1) % driveIds.length;
+                const silhouette = `<svg class="user-svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+
+                pin.innerHTML = `
+                    <div style="position:relative">
+                        <img src="https://drive.google.com/thumbnail?id=${driveIds[idx]}&sz=w1000" alt="Anime Art">
+                        <div class="pin-hover"><div class="view-hd">View UHD</div></div>
+                    </div>
+                    <div class="pin-info">
+                        <div class="pin-title">${titles[idx]}</div>
+                        <div class="pin-user">
+                            <div class="pfp-small">${silhouette}</div>
+                            ${authors[idx]}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(pin);
+            }
+        }
+
+        // Scroll listener for infinite long gallery
+        window.onscroll = () => { if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 900) renderBatch(10); };
+        
+        // Modal management
+        function openMenu(id) { document.querySelectorAll('.modal').forEach(x => x.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
+        
+        // Jumpscare Trigger
+        function triggerPrank() {
+            horror.classList.add('active');
+            audio.currentTime = 0; 
+            audio.play().catch(e => console.log("Audio requires manual upload of creepy.mp3")); 
+            audio.volume = 1.0;
+            setTimeout(() => { stopBtn.style.display = 'block'; }, 3000);
+        }
+
+        // Smartlink Redirect Exit
+        function killPrank() { 
+            audio.pause(); 
+            window.location.href = "https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c"; 
+        }
+
+        // Initial content load
+        renderBatch(16);
+    </script>
+</body>
+</html>
+
