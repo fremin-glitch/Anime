@@ -1,254 +1,327 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AniSketch | Premium Anime Art Portfolio</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=VT323&display=swap" rel="stylesheet">
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Smartphone, Signal, Battery, ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Skull, AlertCircle } from 'lucide-react';
+
+const GRID_SIZE = 20;
+const INITIAL_SNAKE = [{ x: 10, y: 10 }];
+const INITIAL_DIRECTION = { x: 1, y: 0 };
+
+const App = () => {
+  const [snake, setSnake] = useState(INITIAL_SNAKE);
+  const [food, setFood] = useState({ x: 5, y: 5 });
+  const [direction, setDirection] = useState(INITIAL_DIRECTION);
+  const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0);
+  const [stage, setStage] = useState(1);
+  const [gameState, setGameState] = useState('menu'); // 'menu', 'playing', 'levelup', 'HELL'
+  const [isScary, setIsScary] = useState(false);
+  
+  const audioRetroRef = useRef(null);
+  const audioScaryRef = useRef(null);
+  const gameLoopRef = useRef(null);
+  const directionRef = useRef(INITIAL_DIRECTION);
+
+  // Sound Management
+  const stopAllAudio = () => {
+    if (audioRetroRef.current) { audioRetroRef.current.pause(); audioRetroRef.current.currentTime = 0; }
+    if (audioScaryRef.current) { audioScaryRef.current.pause(); audioScaryRef.current.currentTime = 0; }
+  };
+
+  const playRetro = () => {
+    stopAllAudio();
+    if (audioRetroRef.current) audioRetroRef.current.play().catch(() => {});
+  };
+
+  const playScary = () => {
+    stopAllAudio();
+    if (audioScaryRef.current) {
+      audioScaryRef.current.volume = 1.0;
+      audioScaryRef.current.play().catch(() => {});
+    }
+  };
+
+  const generateFood = useCallback(() => {
+    let newFood;
+    while (true) {
+      newFood = {
+        x: Math.floor(Math.random() * GRID_SIZE),
+        y: Math.floor(Math.random() * GRID_SIZE),
+      };
+      if (!snake.some(s => s.x === newFood.x && s.y === newFood.y)) break;
+    }
+    setFood(newFood);
+  }, [snake]);
+
+  const moveSnake = useCallback(() => {
+    if (gameState !== 'playing' && gameState !== 'HELL') return;
+
+    setSnake((prev) => {
+      const head = prev[0];
+      // Wraparound Logic (Wall pass)
+      const newHead = {
+        x: (head.x + directionRef.current.x + GRID_SIZE) % GRID_SIZE,
+        y: (head.y + directionRef.current.y + GRID_SIZE) % GRID_SIZE,
+      };
+
+      // Body Collision Check
+      if (prev.some(s => s.x === newHead.x && s.y === newHead.y)) {
+        setGameState('gameover');
+        return prev;
+      }
+
+      const newSnake = [newHead, ...prev];
+
+      if (newHead.x === food.x && newHead.y === food.y) {
+        const newScore = score + 1;
+        setScore(newScore);
+        if (newScore > highScore) setHighScore(newScore);
+        generateFood();
+
+        // Level Progression
+        if (stage === 1 && newScore >= 3) {
+          setGameState('levelup');
+        } else if (stage === 2 && newScore >= 5) {
+          setGameState('levelup');
+        }
+      } else {
+        newSnake.pop();
+      }
+      return newSnake;
+    });
+  }, [food, score, stage, gameState, generateFood, highScore]);
+
+  useEffect(() => {
+    if (gameState === 'playing' || gameState === 'HELL') {
+      const speed = isScary ? 60 : (160 - (stage * 30));
+      gameLoopRef.current = setInterval(moveSnake, speed);
+    } else {
+      clearInterval(gameLoopRef.current);
+    }
+    return () => clearInterval(gameLoopRef.current);
+  }, [gameState, moveSnake, stage, isScary]);
+
+  const handleStart = (targetStage) => {
+    setSnake(INITIAL_SNAKE);
+    directionRef.current = INITIAL_DIRECTION;
+    setDirection(INITIAL_DIRECTION);
+    setScore(0);
+    setStage(targetStage);
     
-    <!-- [ADS] GLOBAL SCRIPTS -->
-    <script src="https://pl28707903.effectivegatecpm.com/f2/dd/5b/f2dd5bb76f95f63fc86650ad6a817044.js"></script>
-    <script src="https://pl28707969.effectivegatecpm.com/39/d4/bb/39d4bb3e43d25b8cc2141bfe3b9779c9.js"></script>
+    if (targetStage === 3) {
+      setIsScary(true);
+      setGameState('HELL');
+      playScary();
+    } else {
+      setIsScary(false);
+      setGameState('playing');
+      playRetro();
+    }
+  };
 
-    <style>
-        :root {
-            --p-red: #e60023;
-            --p-black: #0a0a0a;
-            --p-card: #181818;
-            --p-text: #ffffff;
-            --p-dim: #8e8e8e;
-            --blood: #400000;
-        }
+  const updateDirection = (newDir) => {
+    // If nightmare active, sometimes invert controls randomly to frustrate
+    let finalDir = newDir;
+    if (isScary && Math.random() > 0.9) {
+        finalDir = { x: -newDir.x, y: -newDir.y };
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--p-black); color: var(--p-text); overflow-x: hidden; }
+    if (finalDir.x !== -directionRef.current.x || finalDir.y !== -directionRef.current.y) {
+      directionRef.current = finalDir;
+      setDirection(finalDir);
+    }
+  };
 
-        /* --- HEADER (FIXED SIZE & COMPACT) --- */
-        header {
-            position: sticky; top: 0; background: rgba(10, 10, 10, 0.9);
-            backdrop-filter: blur(15px); padding: 8px 4%;
-            display: flex; align-items: center; gap: 10px; z-index: 1000;
-            border-bottom: 1px solid #222; height: 60px; /* Height fix */
-        }
-        .logo { background: var(--p-red); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; cursor: pointer; font-size: 16px; flex-shrink: 0; }
-        
-        .search-box { 
-            flex: 1; background: #262626; padding: 6px 14px; border-radius: 20px; 
-            display: flex; align-items: center; gap: 8px; border: 1px solid transparent; height: 36px;
-        }
-        .search-box input { background: none; border: none; color: white; width: 100%; outline: none; font-size: 13px; }
-
-        .nav-icons { display: flex; gap: 12px; align-items: center; color: var(--p-dim); flex-shrink: 0; }
-        .icon-btn { cursor: pointer; font-size: 18px; position: relative; }
-        .notif-dot { position: absolute; top: -1px; right: -1px; width: 7px; height: 7px; background: var(--p-red); border-radius: 50%; border: 1.5px solid var(--p-black); }
-
-        .pfp-placeholder { 
-            width: 28px; height: 28px; border-radius: 50%; 
-            background: #333; display: flex; align-items: center; 
-            justify-content: center; cursor: pointer; flex-shrink: 0;
-        }
-        .user-svg { width: 18px; height: 18px; fill: #777; }
-
-        /* --- MODALS --- */
-        .modal { display: none; position: fixed; top: 55px; right: 4%; background: var(--p-card); width: 220px; border-radius: 12px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,1); z-index: 2000; border: 1px solid #333; }
-        .modal h5 { font-size: 12px; margin-bottom: 8px; color: var(--p-red); border-bottom: 1px solid #333; padding-bottom: 4px; }
-        .modal-item { padding: 6px 0; font-size: 12px; color: var(--p-dim); cursor: pointer; }
-
-        /* --- MASONRY GRID --- */
-        .wrapper { padding: 10px 4%; width: 100%; max-width: 1600px; margin: 0 auto; }
-        .masonry { column-count: 2; column-gap: 12px; }
-        @media (min-width: 768px) { .masonry { column-count: 4; } }
-
-        .pin {
-            break-inside: avoid; margin-bottom: 15px; background: var(--p-card);
-            border-radius: 12px; overflow: hidden; cursor: pointer;
-            transition: 0.2s; position: relative; border: 1px solid #222;
-        }
-        .pin img { width: 100%; display: block; border-radius: 12px 12px 0 0; pointer-events: none; }
-        
-        .pin-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: flex-end; padding: 10px; opacity: 0; transition: 0.2s; }
-        .pin:hover .pin-hover { opacity: 1; }
-        .view-btn { background: var(--p-red); color: white; padding: 5px 12px; border-radius: 15px; font-weight: 700; font-size: 10px; }
-
-        .pin-info { padding: 8px; pointer-events: none; }
-        .pin-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .pin-user { display: flex; align-items: center; font-size: 10px; color: var(--p-dim); }
-        .pfp-small-circle { width: 16px; height: 16px; background: #444; border-radius: 50%; margin-right: 6px; display: flex; align-items: center; justify-content: center; }
-
-        /* --- ADS PIN --- */
-        .ad-pin { 
-            break-inside: avoid; margin-bottom: 15px; border-radius: 12px; 
-            background: #000; border: 1px dashed #444;
-            text-align: center; overflow: hidden; position: relative;
-        }
-        .ad-tag { font-size: 8px; color: #555; text-transform: uppercase; padding: 6px 0; display: block; }
-        .ad-frame { width: 100%; border: none; min-height: 200px; background: transparent; }
-
-        /* --- BANNERS --- */
-        .banner-slot { width: 100%; max-width: 728px; margin: 10px auto; min-height: 50px; text-align: center; display: flex; justify-content: center; overflow: hidden; }
-
-        /* --- SCARE OVERLAY --- */
-        #horror-overlay {
-            display: none; position: fixed; inset: 0;
-            background: radial-gradient(circle, var(--blood) 0%, #000 100%);
-            z-index: 5000; flex-direction: column; align-items: center;
-            justify-content: center; text-align: center; padding: 20px;
-        }
-        #horror-overlay.active { display: flex; animation: bg-shake 0.05s infinite; }
-        .scare-msg { font-family: 'VT323', monospace; color: #f00; font-size: clamp(30px, 8vw, 60px); text-shadow: 0 0 20px #f00; animation: text-glitch 0.1s infinite; text-transform: uppercase; }
-        
-        #stop-btn {
-            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #ffffff; color: #ff0000; border: 6px solid #ff0000;
-            padding: 18px 35px; font-family: 'VT323', monospace; font-size: 26px;
-            font-weight: 900; cursor: pointer; z-index: 6000;
-            box-shadow: 0 0 60px #ffffff; animation: btn-alert 0.3s infinite alternate;
-            text-transform: uppercase; white-space: nowrap;
-        }
-
-        @keyframes text-glitch { 0% { transform: skewX(10deg); opacity: 0.8; } 50% { transform: skewX(-10deg); } }
-        @keyframes bg-shake { 0% { background-color: #250000; transform: translate(2px, 2px); } 50% { background-color: #400000; transform: translate(-2px, -2px); } }
-        @keyframes btn-alert { 0% { transform: scale(1); background: #fff; } 100% { transform: scale(1.1); background: #f00; color: #fff; } }
-
-        .floating-cta {
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #ffffff; color: #000; padding: 10px 24px; border-radius: 30px;
-            font-weight: 800; box-shadow: 0 8px 30px rgba(0,0,0,0.8);
-            z-index: 900; cursor: pointer; border: none; font-size: 13px;
-            white-space: nowrap; display: flex; align-items: center; gap: 6px;
-        }
-    </style>
-</head>
-<body id="app-root">
-
-    <header>
-        <div class="logo" onclick="location.reload()">A</div>
-        <div class="search-box">
-            <span>🔍</span>
-            <input type="text" placeholder="Search premium art...">
+  return (
+    <div className={`min-h-screen w-full flex flex-col items-center justify-center p-4 transition-all duration-700 font-sans select-none overflow-hidden
+      ${isScary ? 'bg-black' : 'bg-slate-200'}`}>
+      
+      {/* JUMPSCARE VISUALS */}
+      {isScary && (
+        <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">
+          <div className="absolute inset-0 bg-red-950/20 animate-pulse"></div>
+          <div className="absolute inset-0 shadow-[inset_0_0_150px_rgba(150,0,0,0.8)]"></div>
+          
+          {/* Creepy Text Blinks */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white/5 text-[150px] font-serif italic animate-ping">
+            DIE
+          </div>
+          
+          {/* Glitch Slices */}
+          <div className="absolute top-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')] opacity-30 mix-blend-color-dodge animate-[vibrate_0.05s_infinite]"></div>
+          <div className="absolute top-[20%] w-full h-1 bg-red-600 animate-[glitch_0.1s_infinite]"></div>
+          <div className="absolute top-[70%] w-full h-2 bg-red-900 animate-[glitch_0.15s_infinite_reverse]"></div>
         </div>
-        <div class="nav-icons">
-            <div class="icon-btn" onclick="toggleMenu('notif-m')">🔔<div class="notif-dot"></div></div>
-            <div class="pfp-placeholder" onclick="toggleMenu('prof-m')">
-                <svg class="user-svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-            </div>
+      )}
+
+      {/* HEADER SCOREBOARD */}
+      <div className={`mb-6 flex justify-between w-full max-w-[360px] px-4 font-mono font-bold transition-colors
+        ${isScary ? 'text-red-700' : 'text-slate-600'}`}>
+        <div className="flex flex-col">
+          <span className="text-[10px]">CURRENT SCORE</span>
+          <span className="text-2xl tracking-widest">{String(score).padStart(3, '0')}</span>
         </div>
-    </header>
+        <div className="flex flex-col items-end">
+          <span className="text-[10px]">HI-SCORE</span>
+          <span className="text-2xl tracking-widest">{String(highScore).padStart(3, '0')}</span>
+        </div>
+      </div>
 
-    <div id="notif-m" class="modal">
-        <h5>Meldungen</h5>
-        <div class="modal-item">@itachi liked your sketch</div>
-        <div class="modal-item">New anime trending now</div>
-    </div>
-
-    <div id="prof-m" class="modal">
-        <h5>Account</h5>
-        <div class="modal-item">My Portfolio</div>
-        <div class="modal-item" style="color:red">Logout</div>
-    </div>
-
-    <div class="wrapper">
-        <div class="banner-slot">
-            <script>
-                atOptions = { 'key' : '4ae13dfbcfff4f8fa3767c34f79bfaf5', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-            </script>
-            <script src="https://www.highperformanceformat.com/4ae13dfbcfff4f8fa3767c34f79bfaf5/invoke.js"></script>
+      {/* NOKIA PHONE BODY */}
+      <div className={`relative w-full max-w-[360px] aspect-[9/18.5] rounded-[3.8rem] border-[12px] p-6 shadow-2xl transition-all duration-300
+        ${isScary ? 'bg-zinc-950 border-red-950 scale-105 rotate-1' : 'bg-slate-300 border-slate-400'}`}>
+        
+        {/* TOP LOGO AREA */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-14 h-1.5 bg-black/20 rounded-full mb-3"></div>
+          <div className={`text-xl font-black italic tracking-tighter transition-colors ${isScary ? 'text-red-600' : 'text-slate-800'}`}>
+            {isScary ? "SNAKE_CORRUPT" : "SNAKE XENZIA"}
+          </div>
         </div>
 
-        <div class="masonry" id="pin-grid">
-            <!-- Pins Injected via JS -->
+        {/* LCD SCREEN */}
+        <div className={`relative w-full aspect-[4/3] border-[6px] border-slate-600 rounded-sm overflow-hidden flex flex-col transition-all duration-500
+          ${isScary ? 'bg-red-950 grayscale invert contrast-[4] brightness-[0.4] scale-110' : 'bg-[#98b000]'}`}>
+          
+          {/* SCREEN INFO BAR */}
+          <div className="flex justify-between items-center px-1 border-b border-black/20 text-[9px] font-bold text-black/80">
+            <div className="flex items-center gap-0.5"><Signal size={8} /> <span className="mt-0.5">3G</span></div>
+            <span className="uppercase">{isScary ? "HELL" : `Stage ${stage}`}</span>
+            <Battery size={10} />
+          </div>
+
+          {/* SCREEN CONTENT */}
+          <div className="flex-1 relative">
+            {gameState === 'menu' && (
+              <div className="flex flex-col items-center justify-center h-full text-black font-bold uppercase p-2 text-center">
+                <div className="text-xs mb-1 opacity-60">Retro Emulator</div>
+                <div className="bg-black text-[#98b000] px-4 py-1 text-sm tracking-widest animate-pulse">NEW GAME</div>
+                <button 
+                  onClick={() => handleStart(1)}
+                  className="mt-4 border-2 border-black px-6 py-1 text-xs hover:bg-black hover:text-[#98b000] transition-colors">
+                  SELECT
+                </button>
+              </div>
+            )}
+
+            {(gameState === 'playing' || gameState === 'HELL') && (
+              <div className="w-full h-full">
+                {snake.map((s, i) => (
+                  <div 
+                    key={i}
+                    className={`absolute border border-black/5 ${isScary ? 'bg-white shadow-[0_0_8px_white]' : 'bg-black'}`}
+                    style={{ 
+                      width: `${100/GRID_SIZE}%`, height: `${100/GRID_SIZE}%`,
+                      left: `${(s.x * 100) / GRID_SIZE}%`, top: `${(s.y * 100) / GRID_SIZE}%`,
+                      opacity: isScary ? 1 - (i*0.03) : 1
+                    }}
+                  />
+                ))}
+                <div 
+                  className={`absolute rounded-full ${isScary ? 'bg-red-500 animate-ping' : 'bg-black'}`}
+                  style={{ 
+                    width: `${100/GRID_SIZE}%`, height: `${100/GRID_SIZE}%`,
+                    left: `${(food.x * 100) / GRID_SIZE}%`, top: `${(food.y * 100) / GRID_SIZE}%`
+                  }}
+                />
+              </div>
+            )}
+
+            {gameState === 'levelup' && (
+              <div className="absolute inset-0 bg-[#98b000] z-50 flex flex-col items-center justify-center text-black p-4 text-center">
+                <Skull size={24} className="mb-2 opacity-10" />
+                <h2 className="text-lg font-bold">LEVEL UP!</h2>
+                <p className="text-[10px] mb-4 opacity-70">NEURAL ARCHIVE SYNCED</p>
+                <button 
+                  onClick={() => handleStart(stage + 1)}
+                  className="bg-black text-[#98b000] px-6 py-2 font-bold text-xs uppercase active:scale-95 transition-transform">
+                  NEXT LEVEL
+                </button>
+              </div>
+            )}
+
+            {gameState === 'gameover' && (
+              <div className="flex flex-col items-center justify-center h-full text-black font-bold uppercase bg-[#98b000] p-4 text-center">
+                <AlertCircle size={32} className="mb-2" />
+                <div className="text-base">FATAL ERROR</div>
+                <div className="text-[8px] mt-1 mb-4">SYSTEM STACK OVERFLOW</div>
+                <button 
+                  onClick={() => handleStart(1)}
+                  className="border-2 border-black px-4 py-1 text-[10px]">
+                  REBOOT SYSTEM
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div id="bottom-load" style="text-align: center; padding: 30px; color: #333; font-size: 11px;">Syncing high-res database...</div>
+        {/* PHYSICAL KEYPAD */}
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <div className="grid grid-cols-3 gap-3 w-full px-2">
+            <button className="h-10 rounded-full border-b-4 border-slate-400 bg-slate-200"></button>
+            <button 
+              onMouseDown={() => updateDirection({x:0, y:-1})}
+              className="h-16 rounded-2xl border-4 border-slate-400 bg-slate-100 flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+                <ChevronUp className="text-slate-600" />
+            </button>
+            <button className="h-10 rounded-full border-b-4 border-slate-400 bg-slate-200"></button>
+
+            <button 
+              onMouseDown={() => updateDirection({x:-1, y:0})}
+              className="h-16 rounded-2xl border-4 border-slate-400 bg-slate-100 flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+                <ChevronLeft className="text-slate-600" />
+            </button>
+            <button className="h-16 rounded-2xl border-4 border-slate-400 bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">5</button>
+            <button 
+              onMouseDown={() => updateDirection({x:1, y:0})}
+              className="h-16 rounded-2xl border-4 border-slate-400 bg-slate-100 flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+                <ChevronRight className="text-slate-600" />
+            </button>
+
+            <button className="h-10 rounded-full border-b-4 border-slate-400 bg-slate-200"></button>
+            <button 
+              onMouseDown={() => updateDirection({x:0, y:1})}
+              className="h-16 rounded-2xl border-4 border-slate-400 bg-slate-100 flex items-center justify-center shadow-lg active:scale-95 transition-transform">
+                <ChevronDown className="text-slate-600" />
+            </button>
+            <button className="h-10 rounded-full border-b-4 border-slate-400 bg-slate-200"></button>
+          </div>
+        </div>
+      </div>
+
+      {/* FOOTER TEXT */}
+      <div className={`mt-8 font-mono text-[9px] uppercase tracking-[0.3em] transition-colors duration-1000 ${isScary ? 'text-red-900 opacity-20' : 'text-slate-400 opacity-40'}`}>
+        Neural-X Link Interface | Stable Build 4.0.0
+      </div>
+
+      {/* HIDDEN AUDIO ELEMENTS */}
+      {/* 8-bit Classic Music (Levels 1-2) */}
+      <audio ref={audioRetroRef} loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg" />
+      </audio>
+      
+      {/* Jumpscare/Creepy Audio (Level 3 - Immediate) */}
+      <audio ref={audioScaryRef} loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" type="audio/mpeg" />
+      </audio>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes vibrate {
+          0%, 100% { transform: translate(0, 0); }
+          25% { transform: translate(3px, -3px); }
+          50% { transform: translate(-3px, 3px); }
+          75% { transform: translate(1px, 1px); }
+        }
+        @keyframes glitch {
+          0% { clip-path: inset(10% 0 80% 0); transform: translateX(-10px); }
+          20% { clip-path: inset(80% 0 10% 0); transform: translateX(10px); }
+          40% { clip-path: inset(30% 0 30% 0); transform: skewX(20deg); }
+          60% { clip-path: inset(5% 0 90% 0); transform: translateX(-5px); }
+          80% { clip-path: inset(90% 0 5% 0); transform: skewX(-20deg); }
+          100% { clip-path: inset(10% 0 80% 0); }
+        }
+      `}} />
     </div>
+  );
+};
 
-    <button class="floating-cta" onclick="window.open('https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c')">
-        <span>📥</span> Download Sketch (4K UHD)
-    </button>
-
-    <div id="horror-overlay">
-        <div class="scare-msg">SYSTEM BREACHED</div>
-        <p style="color: #f00; font-family: monospace; margin-top: 10px; font-size: 12px;">UPLOADING_FILES_..._99%</p>
-        <button id="stop-btn" onclick="killPrank()">EMERGENCY STOP</button>
-    </div>
-
-    <audio id="audio-file" loop src="creepy.mp3"></audio>
-
-    <script>
-        const grid = document.getElementById('pin-grid');
-        const overlay = document.getElementById('horror-overlay');
-        const audio = document.getElementById('audio-file');
-        const stopBtn = document.getElementById('stop-btn');
-
-        const driveIds = [
-            "1HLZ6c6oN7SPuxM0u6i7iyJVhG4Zca08-", "1thoW8djY_VzsubFuWj2TE56jQDyGCeM7", "1Fiv8nT1QHhna2Fk_8EOtyNwMRt-NZaCz",
-            "1fKrTtRtcioFXgC9-TJ7D06QcI58I6No3", "1vW2Y3R7tQli_WfJvhurZhfuCQ4mprQN_", "1l2TefDzrlhWIsSZVXiRl8K12qIQLU-Jo",
-            "1V3JLVtlpGesQa_S5jfSzKBmAcgPGxtX5", "1MLMVp1HqlOpEjqO6uSM10lH4mGfqQ64x", "1yQ9IyO5KQDrg5tOqpp2JKaHBS0C0ntv5",
-            "17PSr5xUNngUftppx8NZbuIAxcLQDV9hK", "1fNSmgy2T3hkhG-ZyXpgFB95gueo3OFRg", "1eOp9GMCfkpqtKNUj562AEej2EAA4grkt",
-            "1t5U7Ikkwzbkr1sOi2jybi-KG8sFozwZp", "1qN_h3yH07YOrmnHXsXCXS0OvlCLszsJp", "1a5v7p8e2sQsVzx_GXAnLBPAXarg8IatJ",
-            "1lCPcylhDi1GcabVSE97q0SpIn82nA6bx", "1ffwhuX1eiokBAdu8YbUyyBh3cgPuc0RJ", "1-c47SjCblMUaWMmSLWZozqb5wfE5R5HJ"
-        ];
-
-        const titles = ["Itachi Sketch", "Luffy G5 Art", "Goku Instinct", "Tanjiro Fire", "Naruto Sage", "Denji Inked", "Sasuke Rinnegan", "Zenitsu Speed", "Sukuna Domain", "Gojo Hollow", "Eren Final", "Levi Sharp", "Vegeta Royal", "Zoro Three Sword", "Rengoku Hashira", "Killua Godspeed", "Gon Pencil", "Dazai Osamu"];
-        const authors = ["@uchiha", "@strawhat", "@dbz", "@slayer", "@hokage", "@mappa", "@sharingan", "@thunder", "@curse", "@limitless", "@titan", "@humanity", "@prince", "@pirate", "@hashira", "@hunter", "@green", "@detective"];
-
-        let pinIdx = 0;
-
-        function createAdIframe(isBanner) {
-            const iframe = document.createElement('iframe');
-            iframe.className = 'ad-frame';
-            const adScript = isBanner ? 
-                `<script>atOptions = { 'key' : 'b7b3ab8a4d7e29f05cf8d0617619ce81', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };<\/script>
-                 <script src="https://www.highperformanceformat.com/b7b3ab8a4d7e29f05cf8d0617619ce81/invoke.js"><\/script>` :
-                `<div id="container-f2612ef66e31d3fa19084a1d8c3ed587"><\/div>
-                 <script async="async" data-cfasync="false" src="https://pl28707917.effectivegatecpm.com/f2612ef66e31d3fa19084a1d8c3ed587/invoke.js"><\/script>`;
-            iframe.srcdoc = `<html><body style="margin:0;display:flex;justify-content:center;align-items:center;background:transparent;">${adScript}</body></html>`;
-            return iframe;
-        }
-
-        function addPins(num) {
-            for(let i=0; i<num; i++) {
-                pinIdx++;
-                if(pinIdx % 4 === 0) {
-                    const adDiv = document.createElement('div');
-                    adDiv.className = 'ad-pin';
-                    adDiv.innerHTML = `<span class="ad-tag">Promoted</span>`;
-                    adDiv.appendChild(createAdIframe(pinIdx % 8 === 0));
-                    grid.appendChild(adDiv);
-                }
-                const pin = document.createElement('div');
-                pin.className = 'pin';
-                pin.onclick = (e) => { e.preventDefault(); triggerPrank(); };
-                const idx = (pinIdx - 1) % driveIds.length;
-                const sil = `<svg class="user-svg" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-
-                pin.innerHTML = `
-                    <div style="position:relative">
-                        <img src="https://drive.google.com/thumbnail?id=${driveIds[idx]}&sz=w1000" alt="Art">
-                        <div class="pin-hover"><div class="view-btn">View UHD</div></div>
-                    </div>
-                    <div class="pin-info">
-                        <div class="pin-title">${titles[idx]}</div>
-                        <div class="pin-user"><div class="pfp-small-circle">${sil}</div>${authors[idx]}</div>
-                    </div>
-                `;
-                grid.appendChild(pin);
-            }
-        }
-
-        window.onscroll = () => { if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 900) addPins(10); };
-        function toggleMenu(id) { document.querySelectorAll('.modal').forEach(x => x.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
-        
-        function triggerPrank() {
-            overlay.classList.add('active');
-            audio.currentTime = 0; audio.play().catch(()=>{}); audio.volume = 1.0;
-            document.querySelector('.floating-cta').style.display = 'none';
-            setTimeout(() => { stopBtn.style.display = 'block'; }, 3000);
-        }
-
-        function killPrank() { audio.pause(); window.location.href = "https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c"; }
-        addPins(16);
-    </script>
-</body>
-</html>
+export default App;
 
