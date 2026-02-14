@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AniSketch | Premium Hand-Drawn Anime Art</title>
+    <title>AniSketch | Premium Anime Art Portfolio</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=VT323&display=swap" rel="stylesheet">
     
-    <!-- [ADS] GLOBAL SCRIPTS (Popunder & Social Bar) -->
-    <script src="https://pl28707903.effectivegatecpm.com/f2/dd/5b/f2dd5bb76f95f63fc86650ad6a817044.js"></script>
-    <script src="https://pl28707969.effectivegatecpm.com/39/d4/bb/39d4bb3e43d25b8cc2141bfe3b9779c9.js"></script>
+    <!-- NOTE: Popunder aur Social Bar scripts hata di gayi hain taki drawings par redirect na ho -->
 
     <style>
         :root {
@@ -23,18 +21,18 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--p-black); color: var(--p-text); overflow-x: hidden; }
 
-        /* --- HEADER: Compact & Sleek --- */
+        /* --- SLEEK COMPACT HEADER --- */
         header {
             position: sticky; top: 0; background: rgba(10, 10, 10, 0.9);
             backdrop-filter: blur(15px); padding: 0 4%;
             display: flex; align-items: center; gap: 10px; z-index: 1000;
-            border-bottom: 1px solid #222; height: 60px;
+            border-bottom: 1px solid #222; height: 56px;
         }
         .logo { background: var(--p-red); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; cursor: pointer; font-size: 16px; flex-shrink: 0; }
         
         .search-box { 
-            flex: 1; background: #262626; padding: 6px 14px; border-radius: 20px; 
-            display: flex; align-items: center; gap: 8px; height: 36px;
+            flex: 1; background: #262626; padding: 0 14px; border-radius: 20px; 
+            display: flex; align-items: center; gap: 8px; height: 34px;
         }
         .search-box input { background: none; border: none; color: white; width: 100%; outline: none; font-size: 13px; }
 
@@ -42,18 +40,12 @@
         .icon-btn { cursor: pointer; font-size: 18px; position: relative; }
         .notif-dot { position: absolute; top: -1px; right: -1px; width: 7px; height: 7px; background: var(--p-red); border-radius: 50%; border: 1.5px solid var(--p-black); }
 
-        /* WhatsApp Style Silhouette */
         .pfp-placeholder { 
             width: 28px; height: 28px; border-radius: 50%; 
             background: #333; display: flex; align-items: center; 
             justify-content: center; cursor: pointer; flex-shrink: 0;
         }
         .user-svg { width: 18px; height: 18px; fill: #777; }
-
-        /* --- MODALS --- */
-        .modal { display: none; position: fixed; top: 55px; right: 4%; background: var(--p-card); width: 220px; border-radius: 12px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,1); z-index: 2000; border: 1px solid #333; }
-        .modal h5 { font-size: 12px; margin-bottom: 8px; color: var(--p-red); border-bottom: 1px solid #333; padding-bottom: 4px; }
-        .modal-item { padding: 6px 0; font-size: 12px; color: var(--p-dim); cursor: pointer; }
 
         /* --- MASONRY GRID --- */
         .wrapper { padding: 10px 4%; width: 100%; max-width: 1600px; margin: 0 auto; }
@@ -65,19 +57,18 @@
             border-radius: 12px; overflow: hidden; cursor: pointer;
             transition: 0.2s; position: relative; border: 1px solid #222;
         }
-        /* Anti-Redirect: Content inside is non-clickable so main container handler takes over */
-        .pin img { width: 100%; display: block; border-radius: 12px 12px 0 0; pointer-events: none; }
+        .pin img { width: 100%; display: block; border-radius: 12px 12px 0 0; }
         
-        .pin-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: flex-end; padding: 10px; opacity: 0; transition: 0.2s; pointer-events: none; }
+        .pin-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: flex-end; padding: 10px; opacity: 0; transition: 0.2s; }
         .pin:hover .pin-hover { opacity: 1; }
         .view-btn { background: var(--p-red); color: white; padding: 5px 12px; border-radius: 15px; font-weight: 700; font-size: 10px; }
 
-        .pin-info { padding: 8px; pointer-events: none; }
+        .pin-info { padding: 8px; }
         .pin-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .pin-user { display: flex; align-items: center; font-size: 10px; color: var(--p-dim); }
         .pfp-small-circle { width: 16px; height: 16px; background: #444; border-radius: 50%; margin-right: 6px; display: flex; align-items: center; justify-content: center; }
 
-        /* --- AD PIN --- */
+        /* --- ADS PIN (SAFE IFRAME) --- */
         .ad-pin { 
             break-inside: avoid; margin-bottom: 15px; border-radius: 12px; 
             background: #000; border: 1px dashed #444;
@@ -89,7 +80,7 @@
         /* --- BANNERS --- */
         .banner-slot { width: 100%; max-width: 728px; margin: 10px auto; min-height: 50px; text-align: center; display: flex; justify-content: center; overflow: hidden; }
 
-        /* --- SCARE OVERLAY --- */
+        /* --- JUMPSCARE OVERLAY --- */
         #horror-overlay {
             display: none; position: fixed; inset: 0;
             background: radial-gradient(circle, var(--blood) 0%, #000 100%);
@@ -112,7 +103,7 @@
         @keyframes bg-shake { 0% { background-color: #250000; transform: translate(3px, 3px); } 50% { background-color: #400000; transform: translate(-3px, -3px); } }
         @keyframes btn-alert { 0% { transform: scale(1); background: #fff; } 100% { transform: scale(1.1); background: #f00; color: #fff; } }
 
-        /* DOWNLOAD CTA (SINGLE LINE) */
+        /* SINGLE LINE CTA BAR */
         .floating-cta {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             background: #ffffff; color: #000; padding: 10px 24px; border-radius: 30px;
@@ -124,7 +115,6 @@
 </head>
 <body id="app-root">
 
-    <!-- COMPACT HEADER -->
     <header>
         <div class="logo" onclick="location.reload()">A</div>
         <div class="search-box">
@@ -132,28 +122,15 @@
             <input type="text" placeholder="Search premium art...">
         </div>
         <div class="nav-icons">
-            <div class="icon-btn" onclick="toggleMenu('notif-m')">🔔<div class="notif-dot"></div></div>
-            <div class="pfp-placeholder" onclick="toggleMenu('prof-m')">
+            <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+            <div class="pfp-placeholder">
                 <svg class="user-svg" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
             </div>
         </div>
     </header>
 
-    <!-- MODALS -->
-    <div id="notif-m" class="modal">
-        <h5>Meldungen</h5>
-        <div class="modal-item">@itachi liked your sketch</div>
-        <div class="modal-item">New anime trending now</div>
-    </div>
-
-    <div id="prof-m" class="modal">
-        <h5>Account</h5>
-        <div class="modal-item">My Portfolio</div>
-        <div class="modal-item" style="color:red">Logout</div>
-    </div>
-
     <div class="wrapper">
-        <!-- TOP BANNER -->
+        <!-- [ADS] TOP BANNER (SAFE) -->
         <div class="banner-slot">
             <script>
                 atOptions = { 'key' : '4ae13dfbcfff4f8fa3767c34f79bfaf5', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
@@ -162,21 +139,21 @@
         </div>
 
         <div class="masonry" id="pin-grid">
-            <!-- Content will be injected by JS -->
+            <!-- Pins Injected via JS -->
         </div>
 
         <div id="bottom-load" style="text-align: center; padding: 30px; color: #333; font-size: 11px;">Syncing high-res database...</div>
     </div>
 
-    <!-- SINGLE LINE DOWNLOAD BUTTON -->
+    <!-- CTA DOWNLOAD BUTTON (Only real redirect) -->
     <button class="floating-cta" onclick="window.open('https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c')">
         <span>📥</span> Download Sketch (4K UHD)
     </button>
 
-    <!-- PRANK OVERLAY -->
+    <!-- HORROR LAYER -->
     <div id="horror-overlay">
         <div class="scare-msg">SYSTEM BREACHED</div>
-        <p style="color: #f00; font-family: monospace; margin-top: 10px; font-size: 12px;">UPLOADING_FILES_..._99%</p>
+        <p style="color: #f00; font-family: monospace; margin-top: 10px; font-size: 12px;">UPLOADING_PRIVATE_FILES_..._99%</p>
         <button id="stop-btn" onclick="killPrank()">EMERGENCY STOP</button>
     </div>
 
@@ -214,11 +191,9 @@
             return iframe;
         }
 
-        function addBatch(num) {
+        function addPins(num) {
             for(let i=0; i<num; i++) {
                 pinIdx++;
-                
-                // Ads every 4th slot
                 if(pinIdx % 4 === 0) {
                     const adDiv = document.createElement('div');
                     adDiv.className = 'ad-pin';
@@ -226,19 +201,13 @@
                     adDiv.appendChild(createAdIframe(pinIdx % 8 === 0));
                     grid.appendChild(adDiv);
                 }
-
-                // Normal Pin
                 const pin = document.createElement('div');
                 pin.className = 'pin';
                 
-                // CRITICAL: Block all redirect attempts from Ad scripts on this element
-                pin.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
+                // --- CLICK EVENT TRIGGER ---
+                pin.addEventListener('click', (e) => {
                     triggerPrank();
-                    return false;
-                }, true);
+                });
 
                 const idx = (pinIdx - 1) % driveIds.length;
                 const sil = `<svg class="user-svg" viewBox="0 0 24 24" style="width:12px; height:12px;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
@@ -257,15 +226,7 @@
             }
         }
 
-        // Infinite Scroll
-        window.onscroll = () => { if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 900) addBatch(10); };
-        
-        function toggleMenu(id) { 
-            const m = document.getElementById(id);
-            const vis = m.style.display === 'block';
-            document.querySelectorAll('.modal').forEach(x => x.style.display = 'none'); 
-            m.style.display = vis ? 'none' : 'block'; 
-        }
+        window.onscroll = () => { if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 900) addPins(10); };
         
         function triggerPrank() {
             overlay.classList.add('active');
@@ -275,8 +236,7 @@
         }
 
         function killPrank() { audio.pause(); window.location.href = "https://www.effectivegatecpm.com/x8j5ppcu?key=c8d3de581f2f308306de3b971e6d826c"; }
-        
-        addBatch(16);
+        addPins(16);
     </script>
 </body>
 </html>
